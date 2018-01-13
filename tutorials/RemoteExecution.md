@@ -49,16 +49,8 @@ So estimate however long you think it should take to do the build, and multiply 
     debugger-agent: Unable to listen on 27
     
     
-That [debugger-agent message is a red herring](https://forum.unity.com/threads/6572-debugger-agent-unable-to-listen-on-27.500387/).  Your build failed.  Looking at the mylog file [mirrored here](http://hedges.belmont.edu/~shawley/latest_unity_build_log.txt), one finds the following errors:
+That [debugger-agent message is a red herring](https://forum.unity.com/threads/6572-debugger-agent-unable-to-listen-on-27.500387/).  Your build failed.  Looking at the mylog file [mirrored here](http://hedges.belmont.edu/~shawley/latest_unity_build_log.txt), one finds the following error:
 
     System.Windows.Forms.dll assembly is referenced by user code, but is not supported on StandaloneLinuxUniversal platform. Various failures might follow.
-    UnityEngine.DebugLogHandler:Internal_Log(LogType, String, Object)
-    UnityEngine.DebugLogHandler:LogFormat(LogType, Object, String, Object[])
-    UnityEngine.Logger:LogFormat(LogType, String, Object[])
-    UnityEngine.Debug:LogWarningFormat(String, Object[])
-    UnityEditor.BuildVerifier:VerifyBuildInternal(BuildTarget, String) (at /home/builduser/buildslave/unity/build/Editor/Mono/BuildPipeline/BuildVerifier.cs:53)
-    UnityEditor.BuildVerifier:VerifyBuild(BuildTarget, String) (at /home/builduser/buildslave/unity/build/Editor/Mono/BuildPipeline/BuildVerifier.cs:74)
-
-
 
 So, it's not surprising that "System.Windows.Forms.dll" is "not supported on StandaloneLinuxUniversal platform" -- what I'm confused about it why it's even *trying* to link a Windows file for Linux build.   
