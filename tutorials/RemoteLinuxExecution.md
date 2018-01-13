@@ -55,6 +55,6 @@ That [debugger-agent message is a red herring](https://forum.unity.com/threads/6
 
     System.Windows.Forms.dll assembly is referenced by user code, but is not supported on StandaloneLinuxUniversal platform. Various failures might follow.
 
-So, it's not surprising that "System.Windows.Forms.dll" is "not supported on StandaloneLinuxUniversal platform" -- what I'm confused about it why it's even *trying* to link a Windows file for Linux build.   
+So, it's not surprising that "System.Windows.Forms.dll" is "not supported on StandaloneLinuxUniversal platform" -- what I'm confused about is why it's even *trying* to link a Windows file for Linux build.   
 
 Posting this question to Unity3D forums: [Link Here](https://answers.unity.com/questions/1454241/systemwindowsformsdll-assembly-is-referenced-by-us.html)
