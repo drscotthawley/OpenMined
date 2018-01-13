@@ -10,8 +10,8 @@ But there's a problem: the OpenMined Unity project has a file "Newtonsoft.Json.d
 
 To ensure that the Unity builder can find them, execute the following:
 
-`cd OpenMined/UnityProject/Assets
-ln -s ~/Unity-2017.3.0b1/Editor/Data/MonoBleedingEdge/lib/mono/4.5/Facades/System.*dll .`
+`cd OpenMined/UnityProject/Assets; 
+ln -s {YOUR_UNITY_PATH}/Editor/Data/MonoBleedingEdge/lib/mono/4.5/Facades/System.*dll .`
 
 Now you can build using the following command:
 
