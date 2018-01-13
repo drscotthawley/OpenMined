@@ -44,4 +44,9 @@ You'll see the following errors appear first...
 
 So estimate however long you think it should take to do the build, and multiply by a factor of ~16.
 
-...still waiting...
+...and eventually it will exit with the error message
+
+    debugger-agent: Unable to listen on 27
+    
+    
+Your built application "OpenMinedApp" is nowhere to be found.  It seems the build did not succeeed, but after looking at the mylog file [mirrored here](http://hedges.belmont.edu/~shawley/latest_unity_build_log.txt), I don't notice any telling error messages.   I have not yet discovered what the problem even *is*, let alone how to fix it. 
