@@ -1,5 +1,7 @@
 # Preparing OpenMined for Remote Linux Execution
 
+*The following is a work in progresss. We do **not** yet have a successful build.  Feel free to help!*
+
 You've installed Unity, PySyft, and OpenMined on your Linux (e.g., Ubuntu 16.04) server, and you're logged in over ssh via "ssh -X".
 
 Trying to run the Unity Editor will give you "Failed to initialize graphics" fatal error.
