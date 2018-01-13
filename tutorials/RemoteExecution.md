@@ -50,3 +50,5 @@ So estimate however long you think it should take to do the build, and multiply 
     
     
 Your built application "OpenMinedApp" is nowhere to be found.  It seems the build did not succeeed, but after looking at the mylog file [mirrored here](http://hedges.belmont.edu/~shawley/latest_unity_build_log.txt), I don't notice any telling error messages.   I have not yet discovered what the problem even *is*, let alone how to fix it. 
+
+Mini-update: seems that the [debugger-agent message is a red herring](https://forum.unity.com/threads/6572-debugger-agent-unable-to-listen-on-27.500387/), and the log file *must* contain something useful. 
