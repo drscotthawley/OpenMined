@@ -44,7 +44,7 @@ You'll see the following errors appear first...
 
 So estimate however long you think it should take to do the build, and multiply by a factor of ~16.
 
-...and eventually it will exit with the error message
+...and eventually it will exit with the message
 
     debugger-agent: Unable to listen on 27
     
