@@ -15,7 +15,7 @@ To ensure that the Unity builder can find them, execute the following:
 
 Now you can build using the following command:
 
-`{YOUR_UNITY_PATH}/Unity -batchmode -nographics -projectPath {YOUR_OPENMINED_PATH}/UnityProject -logFile mylog  -buildLinuxUniversalPlayer OpenMinedApp -enableIncompatibleAssetDowngrade`
+    {YOUR_UNITY_PATH}/Unity -batchmode -nographics -projectPath {YOUR_OPENMINED_PATH}/UnityProject -logFile mylog  -buildLinuxUniversalPlayer OpenMinedApp -enableIncompatibleAssetDowngrade -quit
 
 You'll see the following errors appear first...
 
