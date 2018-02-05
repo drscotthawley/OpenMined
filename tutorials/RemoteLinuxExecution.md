@@ -3,7 +3,7 @@
 You've fully installed Unity, PySyft, and OpenMined on your Linux (e.g., Ubuntu 16.04) server, and you're logged in over ssh.
 
 
-0. Your Linux machine has an X (X11) server running.  If it doesn't, you need to install one.  But we're not going to use X11 forwarding, i.e. no "ssh -Y" sort of connection; we will instead run Unity on the machine's local monitor (even though you won't be able to see it).  If your server *has no* monitor, then [follow this guide to set up a 'fake' X display](https://towardsdatascience.com/how-to-run-unity-on-amazon-cloud-or-without-monitor-3c10ce022639). 
+0. Your Linux machine has an X (X11) server running.  If it doesn't, you need to install one.  But we're not going to use X11 forwarding, i.e. no "ssh -Y" sort of connection; we will instead run Unity on the machine's local monitor (even though you won't be able to see it).  If your server *has no* monitor, then [follow this guide to set up a 'fake' X display](https://towardsdatascience.com/how-to-run-unity-on-amazon-cloud-or-without-monitor-3c10ce022639).  *Note that you need permission to use this X display, i.e. if you log in to a computer that someone else is running the X session on, you will be locked out, unless they grant you permission via [xhost +](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html).
 
 
 1. Create a new directory UnityProject/Assets/Editor/ and inside place a C# script containing a method (MyEditorScript.Start) that will push the "Play" button for you.
@@ -48,4 +48,6 @@ Same with the Editor/ directory: it needs an Editor.meta file which you can get 
 
 5. That's it!  You can now try the various OpenMined demos & tutorials remotely, e.g. by [port-forwarding your jupyter notebooks](https://drscotthawley.github.io/How-To-Port-Forward-Jupyter-Notebooks/). 
 
-Now, you won't be able to see the OpenMined log messages that appear in the Unity window.  Presumably there's a  find a way to access those logs from the command line...? 
+## TODO: Viewing status
+You won't be able to see the OpenMined log messages that appear in the Unity window.  
+ OpenMined authors: Presumably there's a  find a way to access those logs from the command line?
