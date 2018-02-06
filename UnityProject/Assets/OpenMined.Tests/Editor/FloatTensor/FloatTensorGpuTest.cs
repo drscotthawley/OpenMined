@@ -15,7 +15,7 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
         public SyftController ctrl;
         public ComputeShader shader;
 
-        public void AssertEqualTensorsData(FloatTensor t1, FloatTensor t2, double delta = 0.0d)
+        public void AssertEqualTensorsData(OpenMined.Syft.Tensor.FloatTensor t1, OpenMined.Syft.Tensor.FloatTensor t2, double delta = 0.0d)
         {
             float[] data1 = new float[t1.Size];
             t1.DataBuffer.GetData(data1);
@@ -32,7 +32,7 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
             }
         }
 
-        public void AssertApproximatelyEqualTensorsData(FloatTensor t1, FloatTensor t2)
+        public void AssertApproximatelyEqualTensorsData(OpenMined.Syft.Tensor.FloatTensor t1, OpenMined.Syft.Tensor.FloatTensor t2)
         {
             AssertEqualTensorsData(t1, t2, .0001f);
         }
@@ -211,6 +211,77 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
 
             base1.AddMatrixMultiply(tensor1, tensor2);
             base2.AddMatrixMultiply(tensor2, tensor1);
+
+            float[] expectedData1 = new float[base1_shape[0] * base1_shape[1]];
+
+            for (int i = 0; i < base1_shape[0]; i++)
+            {
+                for (int j = 0; j < base1_shape[1]; j++)
+                {
+                    int expectedDataIndex = i * base1_shape[1] + j;
+                    expectedData1[expectedDataIndex] = base1_data[expectedDataIndex];
+
+                    for (int k = 0; k < tensor1_shape[1]; k++)
+                    {
+                        expectedData1[expectedDataIndex] += tensor1Cpu[i, k] * tensor2Cpu[k, j];
+                    }
+                }
+            }
+            var expectedTensor1 = ctrl.floatTensorFactory.Create(_data: expectedData1, _shape: base1_shape);
+            expectedTensor1.Gpu(shader);
+            AssertEqualTensorsData(expectedTensor1, base1);
+
+            float[] expectedData2 = new float[base2_shape[0] * base2_shape[1]];
+
+            for (int i = 0; i < base2_shape[0]; i++)
+            {
+                for (int j = 0; j < base2_shape[1]; j++)
+                {
+                    int expectedDataIndex = i * base2_shape[1] + j;
+                    expectedData2[expectedDataIndex] = base2_data[expectedDataIndex];
+                    for (int k = 0; k < tensor2_shape[1]; k++)
+                    {
+                        expectedData2[expectedDataIndex] += tensor2Cpu[i, k] * tensor1Cpu[k, j];
+                    }
+                }
+            }
+
+            var expectedTensor2 = ctrl.floatTensorFactory.Create(_data: expectedData2, _shape: base2_shape);
+            expectedTensor2.Gpu(shader);
+            AssertEqualTensorsData(expectedTensor2, base2);
+        }
+
+        [Test]
+        public void AddMMT()
+        {
+            float[] base1_data = new float[] { 1, 2, 3, 4 };
+            int[] base1_shape = new int[] { 2, 2 };
+            var base1 = ctrl.floatTensorFactory.Create(_data: base1_data, _shape: base1_shape);
+
+            float[] base2_data = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            int[] base2_shape = new int[] { 3, 3 };
+            var base2 = ctrl.floatTensorFactory.Create(_data: base2_data, _shape: base2_shape);
+
+            base1.Gpu(shader);
+            base2.Gpu(shader);
+
+            float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
+            int[] tensor1_shape = new int[] { 2, 3 };
+            int[] tensor2_shape = new int[] { 3, 2 };
+
+            var tensor1 = ctrl.floatTensorFactory.Create(_data: data, _shape: tensor1_shape);
+            var tensor1Cpu = ctrl.floatTensorFactory.Create(_data: data, _shape: tensor1_shape);
+            var tensor2 = ctrl.floatTensorFactory.Create(_data: data, _shape: tensor2_shape);
+            var tensor2Cpu = ctrl.floatTensorFactory.Create(_data: data, _shape: tensor2_shape);
+
+            tensor1.Gpu(shader);
+            tensor2.Gpu(shader);
+
+            Debug.LogFormat("T2 transposed{0}", tensor2.Transpose().Print());
+            Debug.LogFormat("T2 {0}", tensor2.Print());
+
+            base1.AddMMT(tensor1, tensor2.Transpose());
+            base2.AddMMT(tensor2, tensor1.Transpose());
 
             float[] expectedData1 = new float[base1_shape[0] * base1_shape[1]];
 
@@ -652,6 +723,42 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
 
             AssertEqualTensorsData(tensor2, tensor1);
         }
+
+		[Test]
+		public void DivisionElementwiseBySelf_()
+		{
+			float[] data1 = {-10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue / 50, float.MinValue / 50};
+			int[] shape1 = {2, 4};
+			var tensor1 = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			float[] data2 = {1, 1, 1, 1, 1, 1, 1, 1};
+			int[] shape2 = {2, 4};
+			var tensor2 = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+			tensor2.Gpu(shader);
+
+			tensor1.Div(tensor1, inline: true);
+
+			AssertEqualTensorsData(tensor2, tensor1);
+		}
+
+		[Test]
+		public void DivisionElementwiseBySelf()
+		{
+			float[] data1 = {-10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue / 50, float.MinValue / 50};
+			int[] shape1 = {2, 4};
+			var tensor1 = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			float[] data2 = {1, 1, 1, 1, 1, 1, 1, 1};
+			int[] shape2 = {2, 4};
+			var tensor2 = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+			tensor2.Gpu(shader);
+
+			var tensor3 = tensor1.Div(tensor1);
+
+			AssertEqualTensorsData(tensor2, tensor3);
+		}
 
         [Test]
         public void DivisionElementwiseUnequalDimensions()
@@ -1824,6 +1931,49 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
             non2DTensor.Gpu(shader);
             Assert.That(() => non2DTensor.Trace(),
                 Throws.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void Transpose2D()
+        {
+            float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            int[] shape1 = { 2, 5 };
+
+            float[] data2 = { 1, 6, 2, 7, 3, 8, 4, 9, 5, 10 };
+            int[] shape2 = { 5, 2 };
+
+            var tensor = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+            var transpose = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+
+            tensor.Gpu(shader);
+            transpose.Gpu(shader);
+
+            var transposed = tensor.Transpose();
+            Debug.LogFormat("In: {0}", tensor.Print());
+            Debug.LogFormat("Out: {0}", transposed.Print());
+            AssertEqualTensorsData(transpose, transposed);
+        }
+
+        [Test]
+        public void Transpose3D()
+        {
+            float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            int[] shape1 = { 3, 2, 2 };
+
+            float[] data2 = { 1, 5, 9, 3, 7, 11, 2, 6, 10, 4, 8, 12 };
+            int[] shape2 = { 2, 2, 3 };
+
+            var tensor = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+            var transpose = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+
+            tensor.Gpu(shader);
+            transpose.Gpu(shader);
+
+            var transposed = tensor.Transpose(0, 2);
+            Debug.LogFormat("In: {0}", tensor.Print());
+            Debug.LogFormat("Out: {0}", transposed.Print());
+
+            AssertEqualTensorsData(transpose, transposed);
         }
 
         [Test]

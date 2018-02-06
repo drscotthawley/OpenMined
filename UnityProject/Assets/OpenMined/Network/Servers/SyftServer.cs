@@ -1,9 +1,12 @@
 using UnityEngine;
 using OpenMined.Network.Controllers;
+using System.Collections;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Network.Servers
 {
-
 	public class SyftServer : MonoBehaviour
 	{
 		public bool Connected;
@@ -16,21 +19,15 @@ namespace OpenMined.Network.Servers
 
 		private void Start()
 		{
-			_netMqPublisher = new NetMqPublisher(HandleMessage);
-			_netMqPublisher.Start();
+            controller = new SyftController(shader);
 
-			controller = new SyftController(shader);
+            _netMqPublisher = new NetMqPublisher(controller, this);
+			_netMqPublisher.Start();
 		}
 
 		private void Update()
 		{
 			_netMqPublisher.Update();
-		}
-
-		private string HandleMessage(string message)
-		{
-			//Debug.LogFormat("HandleMessage... {0}", message);
-			return controller.processMessage(message);
 		}
 
 		private void OnDestroy()
@@ -41,5 +38,6 @@ namespace OpenMined.Network.Servers
 		public ComputeShader Shader {
 			get { return shader; }
 		}
+
 	}
 }

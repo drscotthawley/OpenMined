@@ -5,6 +5,8 @@ using JetBrains.Annotations;
 using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
+using Newtonsoft.Json.Linq;
+using OpenMined.Protobuf.Onnx;
 
 namespace OpenMined.Syft.Layer
 {
@@ -41,12 +43,12 @@ namespace OpenMined.Syft.Layer
         
         public int getParameter(int i)
         {
-            if(i > 0 && i < parameters.Count) 
+            if(i >= 0 && i < parameters.Count) 
                 return parameters[i];
             throw new ArgumentOutOfRangeException("Parameter " + i + " does not exist.");
         }
         
-        public List<int> getParameters()
+        public virtual List<int> getParameters()
         {
             return parameters;
         }
@@ -128,5 +130,19 @@ namespace OpenMined.Syft.Layer
 
         protected abstract string ProcessForwardMessage (Command msgObj, SyftController ctrl);
 
+        public virtual JToken GetConfig () 
+        {   
+            return new JObject
+            {
+                { "backend", "Model.GetConfig not implemented" }
+            };
+        }
+
+        public virtual GraphProto GetProto (int inputTensorId, SyftController ctrl)
+        {
+            throw new NotImplementedException(
+                "GetProto has not yet been implemented on this class"
+            );
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -7,6 +8,10 @@ using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
 using OpenMined.Syft.Tensor.Factories;
 using UnityEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OpenMined.Protobuf.Onnx;
+
 
 namespace OpenMined.Syft.Layer
 {
@@ -28,12 +33,12 @@ namespace OpenMined.Syft.Layer
 
         private int getLayer(int i)
         {
-            if(i > 0 && i < layers.Count)
+            if(i >= 0 && i < layers.Count)
                 return layers[i];
             throw new ArgumentOutOfRangeException("Sub-layer " + i + " does not exist.");
         }
 
-        private List<int> getLayers()
+        public List<int> getLayers()
         {
             return this.layers;
         }
@@ -48,7 +53,7 @@ namespace OpenMined.Syft.Layer
             for (int i = 0; i < this.layers.Count; i++)
             {
                 int layerIdx = this.layers [i];
-                Layer layer = (Layer)controller.getModel (layerIdx);
+                Layer layer = (Layer)controller.GetModel (layerIdx);
 
                 input = layer.Forward(input);
             }
@@ -62,7 +67,7 @@ namespace OpenMined.Syft.Layer
 
             for (int i = 0; i < this.layers.Count; i++)
             {
-                List<int> layer_params = controller.getModel(layers[i]).getParameters();
+                List<int> layer_params = controller.GetModel(layers[i]).getParameters();
                 for (int j = 0; j < layer_params.Count; j++)
                 {
                     out_str += layer_params[j].ToString() + ",";
@@ -85,7 +90,7 @@ namespace OpenMined.Syft.Layer
                 case "add":
                 {
                     // TODO: Handle adding layers better
-                    var input = (Layer)ctrl.getModel(int.Parse(msgObj.tensorIndexParams[0]));
+                    var input = (Layer)ctrl.GetModel(int.Parse(msgObj.tensorIndexParams[0]));
                     Debug.LogFormat("<color=magenta>Layer Added to Sequential:</color> {0}", input.Id);                    
                     this.AddLayer(input);
                     return input.Id + "";
@@ -103,6 +108,15 @@ namespace OpenMined.Syft.Layer
                     return out_str;
 
                 }
+                case "config":
+                {
+                    Debug.LogFormat("<color=magenta>Get Config:</color> ");
+
+                    var config = this.GetConfig();
+                    config["backend"] = "openmined";
+                    
+                    return config.ToString(Formatting.None);
+                }
                 default: 
                 {
                     return "Model.processMessage not Implemented:" + msgObj.functionCall;
@@ -115,9 +129,74 @@ namespace OpenMined.Syft.Layer
             int cnt = 0;
             foreach (int layer_idx in layers)
             {
-                cnt += controller.getModel(layer_idx).getParameterCount();
+                cnt += controller.GetModel(layer_idx).getParameterCount();
             }
             return cnt;
+        }
+
+        public override List<int> getParameters()
+        {
+            var allParams = new List<int>();
+            foreach (int layer_idx in layers)
+            {
+                var model = controller.GetModel(layer_idx);
+                foreach (int param in model.getParameters())
+                {
+                    allParams.Add(param);
+                }
+            }
+
+            return allParams;
+        }
+
+        public override JToken GetConfig()
+        {
+            var _this = this;
+            
+            var layer_list = new JArray();
+            for (int i = 0; i < this.layers.Count; i++)
+            {   
+                var layer = controller.GetModel(this.layers[i]);
+                layer_list.Add(
+                    new JObject
+                    {
+                        { "class_name", layer.GetType().Name },
+                        { "config", layer.GetConfig() }
+                    }
+                );
+            }
+
+            var config = new JObject
+            {
+                { "class_name", _this.GetType().Name }, 
+                { "config", layer_list}
+            };
+
+            return config;
+        }
+
+        public override GraphProto GetProto (int inputTensorId, SyftController ctrl)
+        {
+            GraphProto g = new GraphProto();
+            g.Name = Guid.NewGuid().ToString("N");
+            for (int i = 0; i < this.layers.Count; i++)
+            {   
+                GraphProto l = controller.GetModel(this.layers[i]).GetProto(inputTensorId, ctrl);
+                if (i != 0)
+                {
+                    l.Input.RemoveAt(0);
+                }
+                inputTensorId = int.Parse(l.Node[0].Output[0]);
+
+                if (i != this.layers.Count - 1)
+                {
+                    l.Output.Clear();
+                }
+
+                g.MergeFrom(l);
+            }
+            
+            return g;
         }
 
     }
